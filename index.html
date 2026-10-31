@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FARIHA — My Special World</title>
+<meta name="description" content="FARIHA — My Special World: A Little World of Beautiful Memories">
+<meta name="theme-color" content="#cfeefc">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Premium Loading Animation -->
+<div id="loader" aria-hidden="true">
+  <div class="loader-orb"><span></span><span></span><span></span></div>
+  <p class="loader-text">FARIHA</p>
+</div>
+
+<!-- Liquid Glass Background -->
+<div class="bg" aria-hidden="true">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="light-sweep"></div>
+  <canvas id="particles"></canvas>
+  <svg class="waves" viewBox="0 0 1440 220" preserveAspectRatio="none">
+    <path class="wave w1" d="M0,120 C180,60 360,180 540,120 C720,60 900,180 1080,120 C1260,60 1350,100 1440,120 L1440,220 L0,220 Z"/>
+    <path class="wave w2" d="M0,150 C200,100 380,200 580,150 C780,100 960,200 1160,150 C1300,115 1380,140 1440,150 L1440,220 L0,220 Z"/>
+  </svg>
+</div>
+
+<!-- Navigation -->
+<header class="topbar glass">
+  <a class="brand glass-btn" href="#home">FARIHA</a>
+  <button id="menuToggle" class="glass-btn icon-btn" aria-label="Menu" aria-expanded="false" aria-controls="nav">
+    <span class="burger"></span>
+  </button>
+  <nav id="nav" aria-label="Main navigation">
+    <a class="glass-btn nav-btn" href="#home">Home</a>
+    <a class="glass-btn nav-btn" href="#letter">A Letter</a>
+    <a class="glass-btn nav-btn" href="#poem">A Poem</a>
+    <a class="glass-btn nav-btn" href="#story">Our Story</a>
+    <a class="glass-btn nav-btn" href="#photos">Photo Gallery</a>
+    <a class="glass-btn nav-btn" href="#videos">Video Gallery</a>
+    <a class="glass-btn nav-btn" href="#music">Our Music</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- 1. HOME -->
+  <section id="home" class="page active">
+    <div class="hero">
+      <p class="eyebrow">MY SPECIAL WORLD</p>
+      <h1 class="hero-title">FARIHA</h1>
+      <p class="hero-sub">A Little World of Beautiful Memories</p>
+      <div class="hero-card glass">
+        <p>কিছু মানুষ আমাদের জীবনে আসে, যাদের উপস্থিতি সাধারণ মুহূর্তগুলোকেও একটু অন্যরকম করে তোলে। ফারিহাকে ঘিরে এই ছোট্ট আয়োজনটি কিছু সুন্দর অনুভূতি, কিছু লেখা, কিছু ছবি, কিছু গান এবং কিছু স্মৃতি এক জায়গায় ধরে রাখার একটি প্রচেষ্টা।</p>
+      </div>
+      <div class="hero-actions">
+        <a class="glass-btn big" href="#letter">Explore Her World</a>
+        <a class="glass-btn big" href="#story">Discover Memories</a>
+      </div>
+    </div>
+
+    <div class="tiles">
+      <a class="tile glass" href="#letter"><span class="tile-ic">✉</span><b>A Letter</b><small>ফারিহার জন্য একটি চিঠি</small></a>
+      <a class="tile glass" href="#poem"><span class="tile-ic">❋</span><b>A Poem</b><small>তুমি একটি সুন্দর অনুভূতি</small></a>
+      <a class="tile glass" href="#story"><span class="tile-ic">❖</span><b>Our Story</b><small>কিছু অনুভূতি, কিছু অধ্যায়</small></a>
+      <a class="tile glass" href="#photos"><span class="tile-ic">◈</span><b>Photo Gallery</b><small>ছবির সংগ্রহ</small></a>
+      <a class="tile glass" href="#videos"><span class="tile-ic">▶</span><b>Video Gallery</b><small>ভিডিওর সংগ্রহ</small></a>
+      <a class="tile glass" href="#music"><span class="tile-ic">♪</span><b>Our Music</b><small>আমাদের পছন্দের গান</small></a>
+    </div>
+  </section>
+
+  <!-- 2. LETTER -->
+  <section id="letter" class="page">
+    <div class="sec-head">
+      <p class="eyebrow">A Letter for Fariha</p>
+      <h2 id="letterTitle">ফারিহার জন্য একটি চিঠি</h2>
+    </div>
+
+    <div class="envelope-stage" id="envelopeStage">
+      <div class="envelope" id="envelope">
+        <div class="env-back"></div>
+        <div class="env-paper"></div>
+        <div class="env-front"></div>
+        <div class="env-flap"></div>
+        <div class="env-seal">♡</div>
+      </div>
+      <button class="glass-btn big" id="openLetter" type="button">Open My Letter</button>
+    </div>
+
+    <article class="letter-card glass-paper hidden" id="letterCard">
+      <div class="letter-body" id="letterBody"></div>
+      <div class="card-actions">
+        <button class="glass-btn" id="closeLetter" type="button">Close Letter</button>
+        <button class="glass-btn edit-only" id="editLetter" type="button">✎ চিঠি এডিট করুন</button>
+        <button class="glass-btn edit-only" id="resetLetter" type="button">↺ আগের অবস্থায় ফেরান</button>
+      </div>
+    </article>
+  </section>
+
+  <!-- 3. POEM -->
+  <section id="poem" class="page">
+    <div class="sec-head">
+      <p class="eyebrow">A Poem for Fariha</p>
+      <h2 id="poemTitle">তুমি একটি সুন্দর অনুভূতি</h2>
+    </div>
+    <article class="poem-card glass">
+      <div id="poemBody" class="poem-body"></div>
+      <div class="card-actions">
+        <button class="glass-btn" id="replayPoem" type="button">↻ আবার পড়ুন</button>
+        <button class="glass-btn edit-only" id="editPoem" type="button">✎ কবিতা এডিট করুন</button>
+        <button class="glass-btn edit-only" id="resetPoem" type="button">↺ আগের অবস্থায় ফেরান</button>
+      </div>
+    </article>
+  </section>
+
+  <!-- 4. STORY -->
+  <section id="story" class="page">
+    <div class="sec-head">
+      <p class="eyebrow">Our Story</p>
+      <h2>আমাদের গল্প — কিছু অনুভূতি, কিছু অধ্যায়</h2>
+    </div>
+    <article class="story-intro glass">
+      <div id="storyIntro"></div>
+      <div class="card-actions">
+        <button class="glass-btn edit-only" id="editIntro" type="button">✎ ভূমিকা এডিট করুন</button>
+      </div>
+    </article>
+    <div class="story-toolbar edit-only">
+      <button class="glass-btn big" id="addMemory" type="button">＋ নতুন স্মৃতি যোগ করুন</button>
+    </div>
+    <div class="timeline" id="timeline"></div>
+  </section>
+
+  <!-- 5. PHOTOS -->
+  <section id="photos" class="page">
+    <div class="sec-head">
+      <p class="eyebrow">Fariha's Photo Gallery</p>
+      <h2>ফারিহার ছবির গ্যালারি</h2>
+    </div>
+    <div class="story-toolbar edit-only">
+      <button class="glass-btn big" id="addPhotos" type="button">＋ ছবি যোগ করুন</button>
+    </div>
+    <div class="photo-grid" id="photoGrid"></div>
+  </section>
+
+  <!-- 6. VIDEOS -->
+  <section id="videos" class="page">
+    <div class="sec-head">
+      <p class="eyebrow">Fariha's Video Gallery</p>
+      <h2>ফারিহার ভিডিও গ্যালারি</h2>
+    </div>
+    <div class="story-toolbar edit-only">
+      <button class="glass-btn big" id="addVideo" type="button">＋ ভিডিও যোগ করুন</button>
+    </div>
+    <div class="video-grid" id="videoGrid"></div>
+  </section>
+
+  <!-- 7. MUSIC -->
+  <section id="music" class="page">
+    <div class="sec-head">
+      <p class="eyebrow">Our Music</p>
+      <h2>আমাদের গান</h2>
+    </div>
+    <div class="music-layout">
+      <div class="player glass" id="player">
+        <div class="cover" id="cover"><span class="cover-note">♪</span></div>
+        <div class="track-info">
+          <h3 id="trackTitle">কোনো গান নেই</h3>
+          <p id="trackArtist">গান যোগ করুন</p>
+        </div>
+        <div class="wave-bars" id="waveBars" aria-hidden="true"></div>
+        <div class="progress-row">
+          <span id="curTime">0:00</span>
+          <input type="range" id="progress" min="0" max="1000" value="0" aria-label="Progress">
+          <span id="durTime">0:00</span>
+        </div>
+        <div class="controls">
+          <button class="glass-btn round" id="prevBtn" type="button" aria-label="Previous">⏮</button>
+          <button class="glass-btn round play" id="playBtn" type="button" aria-label="Play">▶</button>
+          <button class="glass-btn round" id="nextBtn" type="button" aria-label="Next">⏭</button>
+        </div>
+        <div class="volume-row">
+          <span>🔈</span>
+          <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8" aria-label="Volume">
+          <span>🔊</span>
+        </div>
+      </div>
+      <div class="playlist glass">
+        <div class="playlist-head">
+          <h3>Playlist</h3>
+          <button class="glass-btn edit-only" id="addSong" type="button">＋ গান যোগ করুন</button>
+        </div>
+        <ul id="playlist"></ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>FARIHA — MY SPECIAL WORLD</p>
+  <button class="glass-btn" id="editToggle" type="button">✎ Edit Mode: Off</button>
+</footer>
+
+<!-- Lightbox -->
+<div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="glass-btn round lb-close" id="lbClose" type="button" aria-label="Close">✕</button>
+  <button class="glass-btn round lb-nav lb-prev" id="lbPrev" type="button" aria-label="Previous">‹</button>
+  <figure class="lb-fig glass">
+    <img id="lbImg" alt="">
+    <figcaption><span id="lbCaption"></span><small id="lbCount"></small></figcaption>
+  </figure>
+  <button class="glass-btn round lb-nav lb-next" id="lbNext" type="button" aria-label="Next">›</button>
+</div>
+
+<!-- Generic modal -->
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+  <form class="modal-card glass" id="modalForm" novalidate>
+    <h3 id="modalTitle"></h3>
+    <div id="modalFields"></div>
+    <div class="card-actions">
+      <button class="glass-btn" type="submit" id="modalSubmit">সংরক্ষণ করুন</button>
+      <button class="glass-btn" type="button" id="modalCancel">বাতিল</button>
+    </div>
+  </form>
+</div>
+
+<!-- Hidden file inputs -->
+<input type="file" id="photoInput" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple hidden>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
