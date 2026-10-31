@@ -1,9 +1,10 @@
 /* ==========================================================
-   FARIHA — MY SPECIAL WORLD  |  script.js
+   FARIHA — MY SPECIAL WORLD  |  script.js  (শুধু দেখার সংস্করণ)
    ----------------------------------------------------------
-   সহজে পরিবর্তনের জন্য নিচের দুটি অংশ দেখুন:
+   এই সংস্করণে কোনো এডিট অপশন নেই এবং কোনো ক্লিক সাউন্ড নেই।
+   কনটেন্ট বদলাতে নিচের দুটি অংশ বদলান:
    1) MEDIA_CONFIG  → assets ফোল্ডারের ছবি/ভিডিও/গান এখানে লিখুন
-   2) DEFAULTS      → চিঠি, কবিতা ও গল্পের মূল লেখা
+   2) DEFAULTS      → চিঠি, কবিতা ও গল্পের লেখা
    ========================================================== */
 (() => {
 'use strict';
@@ -107,10 +108,11 @@ const DEFAULTS = {
 এই গল্পের সবকিছু এখনো লেখা শেষ হয়নি। সামনে হয়তো আরও অনেক নতুন অধ্যায় যুক্ত হবে।
 
 কারণ সুন্দর গল্পের শেষ নয়, কখনো কখনো সুন্দর গল্পের সবচেয়ে ভালো অংশটি সামনে অপেক্ষা করে থাকে।`,
-    // নমুনা স্মৃতি — এগুলো শুধু উদাহরণ। Edit Mode চালু করে এডিট বা ডিলিট করুন।
+    // নমুনা স্মৃতি — এগুলো শুধু উদাহরণ। নিজের স্মৃতি দিয়ে বদলে নিন।
+    // photo: 'assets/images/memory-1.jpg' লিখলে স্মৃতির সঙ্গে ছবিও দেখাবে।
     items: [
-      { id: 's1', date: 'তারিখ লিখুন', title: 'প্রথম অধ্যায়', desc: 'এটি একটি নমুনা লেখা। Edit Mode চালু করে এখানে নিজের স্মৃতির কথা লিখুন।' },
-      { id: 's2', date: 'তারিখ লিখুন', title: 'দ্বিতীয় অধ্যায়', desc: 'এটিও নমুনা। নতুন স্মৃতি যোগ করতে "নতুন স্মৃতি যোগ করুন" বাটনে ক্লিক করুন।' },
+      { id: 's1', date: 'তারিখ লিখুন', title: 'প্রথম অধ্যায়', desc: 'এটি একটি নমুনা লেখা। এখানে নিজের স্মৃতির কথা লিখুন।' },
+      { id: 's2', date: 'তারিখ লিখুন', title: 'দ্বিতীয় অধ্যায়', desc: 'এটিও নমুনা। script.js-এর DEFAULTS অংশে এগুলো বদলে নিন।' },
       { id: 's3', date: 'তারিখ লিখুন', title: 'আরও অধ্যায় আসছে…', desc: 'গল্পের সবচেয়ে সুন্দর অংশটি হয়তো সামনেই অপেক্ষা করছে।' },
     ]
   }
@@ -122,10 +124,8 @@ const DEFAULTS = {
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-const uid = () => 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const fmtTime = s => { if (!isFinite(s)) return '0:00'; s = Math.floor(s); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 const setRange = r => r.style.setProperty('--p', (r.value - r.min) / (r.max - r.min) * 100 + '%');
-const baseName = n => n.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim();
 
 let toastTimer;
 function toast(msg) {
@@ -134,42 +134,36 @@ function toast(msg) {
 }
 
 /* ==========================================================
-   Storage  (localStorage = লেখা / IndexedDB = ছবি, ভিডিও, গান)
+   Stored content (শুধু পড়া হয়, কিছু লেখা বা বদলানো হয় না)
+   এই ব্রাউজারে আগে যে ছবি/ভিডিও/গান/লেখা সংরক্ষিত ছিল, তা আগের মতোই দেখাবে।
    ========================================================== */
 const KEY = 'fariha_content_v1';
-let store = (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } })();
+const store = (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } })();
 store.story  ??= { intro: null, items: JSON.parse(JSON.stringify(DEFAULTS.story.items)) };
 store.added  ??= { photos: [], videos: [], music: [] };
 store.hidden ??= [];
 store.meta   ??= {};
-function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(store)); }
-  catch { toast('সংরক্ষণ করা যায়নি — ব্রাউজারের স্টোরেজ পূর্ণ হতে পারে'); }
-}
 
-const DB_NAME = 'fariha_media', DB_STORE = 'blobs';
 let dbPromise;
 function db() {
   if (!dbPromise) dbPromise = new Promise((res, rej) => {
     if (!window.indexedDB) return rej(new Error('IndexedDB unsupported'));
-    const r = indexedDB.open(DB_NAME, 1);
-    r.onupgradeneeded = () => r.result.createObjectStore(DB_STORE);
+    const r = indexedDB.open('fariha_media', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('blobs');
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);
   });
   return dbPromise;
 }
-async function dbOp(mode, fn) {
-  const d = await db();
-  return new Promise((res, rej) => {
-    const tx = d.transaction(DB_STORE, mode); const rq = fn(tx.objectStore(DB_STORE));
-    tx.oncomplete = () => res(rq && rq.result); tx.onerror = () => rej(tx.error);
-  });
+async function getBlob(id) {
+  try {
+    const d = await db();
+    return await new Promise((res, rej) => {
+      const tx = d.transaction('blobs', 'readonly'); const rq = tx.objectStore('blobs').get(id);
+      tx.oncomplete = () => res(rq.result); tx.onerror = () => rej(tx.error);
+    });
+  } catch { return null; }
 }
-const putBlob = (id, blob) => dbOp('readwrite', s => s.put(blob, id));
-const getBlob = id => dbOp('readonly', s => s.get(id));
-const delBlob = id => dbOp('readwrite', s => s.delete(id)).catch(() => {});
-
 const urlCache = new Map();
 async function urlFor(item) {
   if (item.blobId) {
@@ -179,66 +173,18 @@ async function urlFor(item) {
   }
   return item.src || '';
 }
-async function blobUrl(id) { return urlFor({ blobId: id }); }
+const blobUrl = id => urlFor({ blobId: id });
 
-/* media lists = config + user-added − hidden */
+/* media lists = config + আগে সংরক্ষিত − লুকানো */
 function getList(kind) {
   const cfg = (MEDIA_CONFIG[kind] || []).map((m, i) => ({ ...m, id: `cfg-${kind}-${i}`, cfg: true }));
   return [...cfg, ...store.added[kind]]
     .filter(m => !store.hidden.includes(m.id))
     .map(m => ({ ...m, ...(store.meta[m.id] || {}) }));
 }
-async function removeMedia(kind, item) {
-  if (item.cfg) store.hidden.push(item.id);
-  else {
-    store.added[kind] = store.added[kind].filter(m => m.id !== item.id);
-    if (item.blobId) { await delBlob(item.blobId); urlCache.delete(item.blobId); }
-    if (item.coverBlobId) await delBlob(item.coverBlobId);
-  }
-  delete store.meta[item.id]; save();
-}
 
 /* ==========================================================
-   Generic modal form
-   ========================================================== */
-let modalResolve = null;
-function openForm({ title, fields, submitText = 'সংরক্ষণ করুন', onSubmit }) {
-  $('#modalTitle').textContent = title;
-  $('#modalSubmit').textContent = submitText;
-  const box = $('#modalFields'); box.innerHTML = '';
-  fields.forEach(f => {
-    const w = el('div', 'field');
-    const id = 'f_' + f.name;
-    const lb = el('label', null, f.label); lb.htmlFor = id; w.appendChild(lb);
-    let inp;
-    if (f.type === 'textarea') { inp = el('textarea'); inp.rows = f.rows || 6; inp.value = f.value || ''; }
-    else if (f.type === 'file') { inp = el('input'); inp.type = 'file'; inp.accept = f.accept || ''; if (f.multiple) inp.multiple = true; }
-    else { inp = el('input'); inp.type = 'text'; inp.value = f.value || ''; }
-    inp.id = id; inp.name = f.name; w.appendChild(inp);
-    if (f.hint) w.appendChild(el('small', null, f.hint));
-    box.appendChild(w);
-  });
-  const m = $('#modal'); m.classList.remove('hidden');
-  const first = box.querySelector('input,textarea'); if (first && first.type !== 'file') first.focus();
-  modalResolve = async () => {
-    const vals = {};
-    for (const f of fields) {
-      const inp = $('#f_' + f.name);
-      vals[f.name] = f.type === 'file' ? Array.from(inp.files) : inp.value;
-      if (f.required && (f.type === 'file' ? !vals[f.name].length : !String(vals[f.name]).trim())) { toast(`"${f.label}" দিতে হবে`); inp.focus(); return false; }
-    }
-    $('#modalSubmit').disabled = true;
-    try { await onSubmit(vals); closeModal(); } catch (e) { console.error(e); toast('কিছু একটা সমস্যা হয়েছে'); }
-    finally { $('#modalSubmit').disabled = false; }
-  };
-}
-function closeModal() { $('#modal').classList.add('hidden'); modalResolve = null; }
-$('#modalForm').addEventListener('submit', e => { e.preventDefault(); if (modalResolve) modalResolve(); });
-$('#modalCancel').addEventListener('click', closeModal);
-$('#modal').addEventListener('pointerdown', e => { if (e.target.id === 'modal') closeModal(); });
-
-/* ==========================================================
-   Ripple on every glass button
+   Ripple on every glass button (শব্দ ছাড়া, শুধু দৃশ্য)
    ========================================================== */
 document.addEventListener('pointerdown', e => {
   const b = e.target.closest('.glass-btn, .vplay'); if (!b) return;
@@ -278,20 +224,6 @@ const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting
 function observeReveals() { $$('.page.active .reveal:not(.in)').forEach(n => io.observe(n)); }
 
 /* ==========================================================
-   Edit mode (লোকাল — শুধু এই ব্রাউজারে কাজ করে)
-   ========================================================== */
-function setEdit(on) {
-  document.body.classList.toggle('edit-mode', on);
-  $('#editToggle').textContent = '✎ Edit Mode: ' + (on ? 'On' : 'Off');
-  try { localStorage.setItem('fariha_edit', on ? '1' : '0'); } catch {}
-}
-$('#editToggle').addEventListener('click', () => {
-  const on = !document.body.classList.contains('edit-mode');
-  setEdit(on); toast(on ? 'Edit Mode চালু হয়েছে' : 'Edit Mode বন্ধ হয়েছে');
-  renderAll();
-});
-
-/* ==========================================================
    Letter
    ========================================================== */
 const letterData = () => store.letter || DEFAULTS.letter;
@@ -322,15 +254,6 @@ $('#closeLetter').addEventListener('click', () => {
   $('#envelopeStage').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
-$('#editLetter').addEventListener('click', () => openForm({
-  title: 'চিঠি এডিট করুন',
-  fields: [
-    { name: 'title', label: 'শিরোনাম', value: letterData().title, required: true },
-    { name: 'text', label: 'চিঠি (অনুচ্ছেদের মাঝে একটি ফাঁকা লাইন দিন)', type: 'textarea', rows: 14, value: letterData().text, required: true },
-  ],
-  onSubmit: v => { store.letter = { title: v.title.trim(), text: v.text }; save(); renderLetter(); toast('চিঠি সংরক্ষিত হয়েছে'); }
-}));
-$('#resetLetter').addEventListener('click', () => { if (confirm('চিঠি আগের মূল লেখায় ফিরিয়ে নেবেন?')) { delete store.letter; save(); renderLetter(); toast('মূল চিঠি ফিরে এসেছে'); } });
 
 /* ==========================================================
    Poem
@@ -353,22 +276,10 @@ function replayPoem() {
   stz.forEach(s => s.classList.remove('in'));
   void document.body.offsetWidth;
   let n = 0;
-  stz.forEach(s => {
-    $$('.poem-line', s).forEach(l => { l.style.transitionDelay = (n++ * 0.28) + 's'; });
-    s.style.setProperty('--d', n * .28 + 's');
-  });
+  stz.forEach(s => { $$('.poem-line', s).forEach(l => { l.style.transitionDelay = (n++ * 0.28) + 's'; }); });
   requestAnimationFrame(() => requestAnimationFrame(() => { lines.forEach(l => l.classList.add('in')); stz.forEach(s => s.classList.add('in')); }));
 }
 $('#replayPoem').addEventListener('click', replayPoem);
-$('#editPoem').addEventListener('click', () => openForm({
-  title: 'কবিতা এডিট করুন',
-  fields: [
-    { name: 'title', label: 'শিরোনাম', value: poemData().title, required: true },
-    { name: 'text', label: 'কবিতা (স্তবকের মাঝে একটি ফাঁকা লাইন দিন)', type: 'textarea', rows: 14, value: poemData().text, required: true },
-  ],
-  onSubmit: v => { store.poem = { title: v.title.trim(), text: v.text }; save(); renderPoem(); toast('কবিতা সংরক্ষিত হয়েছে'); }
-}));
-$('#resetPoem').addEventListener('click', () => { if (confirm('কবিতা আগের মূল লেখায় ফিরিয়ে নেবেন?')) { delete store.poem; save(); renderPoem(); toast('মূল কবিতা ফিরে এসেছে'); } });
 
 /* ==========================================================
    Story
@@ -379,51 +290,23 @@ function renderStory() {
 
   const tl = $('#timeline'); tl.innerHTML = '';
   if (!store.story.items.length) {
-    const e = el('div', 'empty glass'); e.append(el('b', null, 'এখনো কোনো স্মৃতি নেই'), el('span', null, 'Edit Mode চালু করে নতুন স্মৃতি যোগ করুন।'));
+    const e = el('div', 'empty glass'); e.append(el('b', null, 'এখনো কোনো স্মৃতি যোগ করা হয়নি'));
     tl.appendChild(e); return;
   }
   store.story.items.forEach(m => {
     const it = el('div', 't-item reveal');
     const card = el('article', 'memory glass');
     card.append(el('div', 'date', m.date || ''), el('h3', null, m.title || ''), el('p', null, m.desc || ''));
-    if (m.photoId) { const img = el('img'); img.alt = m.title || ''; img.loading = 'lazy'; blobUrl(m.photoId).then(u => img.src = u); card.appendChild(img); }
-    const act = el('div', 'card-actions');
-    const eb = el('button', 'glass-btn small edit-only', '✎ এডিট'); eb.type = 'button'; eb.onclick = () => memoryForm(m);
-    const db_ = el('button', 'glass-btn small edit-only', '🗑 ডিলিট'); db_.type = 'button';
-    db_.onclick = async () => {
-      if (!confirm('এই স্মৃতিটি ডিলিট করবেন?')) return;
-      if (m.photoId) await delBlob(m.photoId);
-      store.story.items = store.story.items.filter(x => x.id !== m.id); save(); renderStory(); toast('স্মৃতি ডিলিট হয়েছে');
-    };
-    act.append(eb, db_); card.appendChild(act); it.appendChild(card); tl.appendChild(it);
+    if (m.photoId || m.photo) {
+      const img = el('img'); img.alt = m.title || ''; img.loading = 'lazy';
+      if (m.photoId) blobUrl(m.photoId).then(u => { img.src = u; }); else img.src = m.photo;
+      img.onerror = () => img.remove();
+      card.appendChild(img);
+    }
+    it.appendChild(card); tl.appendChild(it);
   });
   observeReveals();
 }
-function memoryForm(m) {
-  const edit = !!m;
-  openForm({
-    title: edit ? 'স্মৃতি এডিট করুন' : 'নতুন স্মৃতি যোগ করুন',
-    fields: [
-      { name: 'date', label: 'তারিখ', value: m?.date || '', hint: 'যেমন: ১২ মার্চ ২০২৫' },
-      { name: 'title', label: 'শিরোনাম', value: m?.title || '', required: true },
-      { name: 'desc', label: 'বিবরণ', type: 'textarea', rows: 6, value: m?.desc || '' },
-      { name: 'photo', label: 'ছবি (ঐচ্ছিক)', type: 'file', accept: '.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp', hint: edit && m.photoId ? 'নতুন ছবি দিলে আগেরটি বদলে যাবে।' : '' },
-    ],
-    onSubmit: async v => {
-      let photoId = m?.photoId || null;
-      if (v.photo[0]) { if (photoId) await delBlob(photoId); photoId = uid(); await putBlob(photoId, v.photo[0]); }
-      const rec = { id: m?.id || uid(), date: v.date.trim(), title: v.title.trim(), desc: v.desc.trim(), photoId };
-      if (edit) store.story.items = store.story.items.map(x => x.id === m.id ? rec : x); else store.story.items.push(rec);
-      save(); renderStory(); toast(edit ? 'স্মৃতি আপডেট হয়েছে' : 'নতুন স্মৃতি যোগ হয়েছে');
-    }
-  });
-}
-$('#addMemory').addEventListener('click', () => memoryForm());
-$('#editIntro').addEventListener('click', () => openForm({
-  title: 'গল্পের ভূমিকা এডিট করুন',
-  fields: [{ name: 'intro', label: 'ভূমিকা', type: 'textarea', rows: 14, value: store.story.intro ?? DEFAULTS.story.intro, required: true }],
-  onSubmit: v => { store.story.intro = v.intro; save(); renderStory(); toast('ভূমিকা সংরক্ষিত হয়েছে'); }
-}));
 
 /* ==========================================================
    Photos + Lightbox
@@ -434,7 +317,7 @@ function renderPhotos() {
   const list = getList('photos');
   if (!list.length) {
     const e = el('div', 'empty glass');
-    e.append(el('b', null, 'এখনো কোনো ছবি যোগ করা হয়নি'), el('span', null, 'Edit Mode চালু করে "ছবি যোগ করুন" চাপুন, অথবা script.js-এর MEDIA_CONFIG-এ ছবির পথ লিখুন।'));
+    e.append(el('b', null, 'ছবি শীঘ্রই যোগ করা হবে'));
     grid.appendChild(e); return;
   }
   list.forEach((p, i) => {
@@ -443,25 +326,11 @@ function renderPhotos() {
     urlFor(p).then(u => { img.src = u; });
     img.onerror = () => { wrap.style.display = 'grid'; wrap.style.placeItems = 'center'; wrap.textContent = 'ছবি পাওয়া যায়নি'; };
     wrap.appendChild(img); fig.append(wrap, el('figcaption', null, p.caption || ''));
-    fig.addEventListener('click', e => { if (!e.target.closest('.card-actions')) openLightbox(i); });
-    const act = el('div', 'card-actions');
-    const cb = el('button', 'glass-btn small edit-only', '✎ ক্যাপশন'); cb.type = 'button';
-    cb.onclick = () => openForm({ title: 'ক্যাপশন এডিট', fields: [{ name: 'caption', label: 'ক্যাপশন', value: p.caption || '' }],
-      onSubmit: v => { store.meta[p.id] = { ...(store.meta[p.id] || {}), caption: v.caption.trim() }; save(); renderPhotos(); } });
-    const dl = el('button', 'glass-btn small edit-only', '🗑 ডিলিট'); dl.type = 'button';
-    dl.onclick = async () => { if (confirm('ছবিটি ডিলিট করবেন?')) { await removeMedia('photos', p); renderPhotos(); toast('ছবি ডিলিট হয়েছে'); } };
-    act.append(cb, dl); fig.appendChild(act); grid.appendChild(fig);
+    fig.addEventListener('click', () => openLightbox(i));
+    grid.appendChild(fig);
   });
   observeReveals();
 }
-$('#addPhotos').addEventListener('click', () => $('#photoInput').click());
-$('#photoInput').addEventListener('change', async e => {
-  const files = Array.from(e.target.files).filter(f => /\.(jpe?g|png|webp)$/i.test(f.name) || /^image\/(jpeg|png|webp)$/.test(f.type));
-  e.target.value = '';
-  if (!files.length) return toast('শুধু JPG, JPEG, PNG বা WebP ছবি যোগ করা যাবে');
-  for (const f of files) { const id = uid(); await putBlob(id, f); store.added.photos.push({ id, blobId: id, caption: baseName(f.name) }); }
-  save(); renderPhotos(); toast(`${files.length}টি ছবি যোগ হয়েছে`);
-});
 
 const lb = $('#lightbox');
 async function showLb() {
@@ -482,9 +351,10 @@ let tx = 0;
 lb.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
 lb.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) lbStep(dx > 0 ? -1 : 1); });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { if (!$('#modal').classList.contains('hidden')) closeModal(); else if (!lb.classList.contains('hidden')) closeLb(); }
   if (lb.classList.contains('hidden')) return;
-  if (e.key === 'ArrowLeft') lbStep(-1); if (e.key === 'ArrowRight') lbStep(1);
+  if (e.key === 'Escape') closeLb();
+  if (e.key === 'ArrowLeft') lbStep(-1);
+  if (e.key === 'ArrowRight') lbStep(1);
 });
 
 /* ==========================================================
@@ -497,7 +367,7 @@ function renderVideos() {
   const list = getList('videos');
   if (!list.length) {
     const e = el('div', 'empty glass');
-    e.append(el('b', null, 'এখনো কোনো ভিডিও যোগ করা হয়নি'), el('span', null, 'Edit Mode চালু করে "ভিডিও যোগ করুন" চাপুন, অথবা script.js-এর MEDIA_CONFIG-এ ভিডিওর পথ লিখুন।'));
+    e.append(el('b', null, 'ভিডিও শীঘ্রই যোগ করা হবে'));
     grid.appendChild(e); return;
   }
   list.forEach(item => {
@@ -516,7 +386,7 @@ function renderVideos() {
     const fs = el('button', 'glass-btn', '⛶'); fs.type = 'button'; fs.setAttribute('aria-label', 'Fullscreen');
     ctrl.append(pp, seek, time, vol, fs);
 
-    const toggle = () => { if (v.paused) { pauseAllVideos(v); v.play().catch(() => toast('ভিডিওটি চালানো যায়নি — ফাইল/পথ ঠিক আছে কিনা দেখুন')); } else v.pause(); };
+    const toggle = () => { if (v.paused) { pauseAllVideos(v); v.play().catch(() => toast('ভিডিওটি চালানো যায়নি')); } else v.pause(); };
     big.onclick = toggle; pp.onclick = toggle; v.onclick = toggle;
     v.onplay = () => { card.classList.add('playing'); pp.textContent = '❚❚'; pauseAllVideos(v); };
     v.onpause = () => { card.classList.remove('playing'); pp.textContent = '▶'; };
@@ -535,33 +405,13 @@ function renderVideos() {
     videoEls.push(v);
 
     card.append(wrap, ctrl, el('p', 'vcap', item.caption || ''));
-    const act = el('div', 'card-actions');
-    const cb = el('button', 'glass-btn small edit-only', '✎ ক্যাপশন'); cb.type = 'button';
-    cb.onclick = () => openForm({ title: 'ক্যাপশন এডিট', fields: [{ name: 'caption', label: 'ক্যাপশন', value: item.caption || '' }],
-      onSubmit: val => { store.meta[item.id] = { ...(store.meta[item.id] || {}), caption: val.caption.trim() }; save(); renderVideos(); } });
-    const dl = el('button', 'glass-btn small edit-only', '🗑 ডিলিট'); dl.type = 'button';
-    dl.onclick = async () => { if (confirm('ভিডিওটি ডিলিট করবেন?')) { await removeMedia('videos', item); renderVideos(); toast('ভিডিও ডিলিট হয়েছে'); } };
-    act.append(cb, dl); card.appendChild(act); grid.appendChild(card);
+    grid.appendChild(card);
   });
   observeReveals();
 }
-$('#addVideo').addEventListener('click', () => openForm({
-  title: 'ভিডিও যোগ করুন',
-  fields: [
-    { name: 'file', label: 'MP4 ভিডিও', type: 'file', accept: '.mp4,video/mp4', required: true },
-    { name: 'caption', label: 'ক্যাপশন', hint: 'খালি রাখলে ফাইলের নাম ব্যবহার হবে।' },
-  ],
-  onSubmit: async v => {
-    const f = v.file[0];
-    if (!/\.mp4$/i.test(f.name) && f.type !== 'video/mp4') throw new Error('not mp4');
-    const id = uid(); await putBlob(id, f);
-    store.added.videos.push({ id, blobId: id, caption: v.caption.trim() || baseName(f.name) });
-    save(); renderVideos(); toast('ভিডিও যোগ হয়েছে');
-  }
-}));
 
 /* ==========================================================
-   Music
+   Music (গান নিজে থেকে কখনো চালু হয় না — Play চাপলে তবেই চলে)
    ========================================================== */
 const audio = new Audio(); audio.preload = 'metadata';
 let tracks = [], cur = -1, curId = null;
@@ -581,7 +431,7 @@ async function loadTrack(i, autoplay) {
   audio.src = await urlFor(t);
   $('#progress').value = 0; setRange($('#progress')); $('#curTime').textContent = '0:00'; $('#durTime').textContent = '0:00';
   $$('#playlist .pl-item').forEach((n, k) => n.classList.toggle('active', k === i));
-  if (autoplay) audio.play().catch(() => toast('গানটি চালানো যায়নি — ফাইল/পথ ঠিক আছে কিনা দেখুন'));
+  if (autoplay) audio.play().catch(() => toast('গানটি চালানো যায়নি'));
 }
 function renderMusic() {
   tracks = getList('music');
@@ -590,7 +440,7 @@ function renderMusic() {
   ['prevBtn', 'playBtn', 'nextBtn', 'progress', 'volume'].forEach(id => { $('#' + id).disabled = !has; });
   if (!has) {
     audio.pause(); audio.removeAttribute('src'); cur = -1; curId = null; setPlayingUI(false);
-    $('#trackTitle').textContent = 'কোনো গান নেই'; $('#trackArtist').textContent = 'Edit Mode চালু করে গান যোগ করুন';
+    $('#trackTitle').textContent = 'কোনো গান নেই'; $('#trackArtist').textContent = 'গান শীঘ্রই যোগ করা হবে';
     $('#cover').innerHTML = '<span class="cover-note">♪</span>';
     const li = el('li', 'empty'); li.textContent = 'প্লেলিস্ট এখনো খালি'; pl.appendChild(li); return;
   }
@@ -598,13 +448,6 @@ function renderMusic() {
     const li = el('li', 'pl-item'); li.tabIndex = 0;
     const meta = el('div', 'meta'); meta.append(el('b', null, t.title || 'নামহীন গান'), el('small', null, t.artist || 'শিল্পী অজানা'));
     li.append(el('span', 'n', String(i + 1)), meta);
-    const dl = el('button', 'glass-btn small edit-only', '🗑'); dl.type = 'button'; dl.setAttribute('aria-label', 'Delete');
-    dl.onclick = async e => { e.stopPropagation(); if (confirm('গানটি ডিলিট করবেন?')) { await removeMedia('music', t); renderMusic(); toast('গান ডিলিট হয়েছে'); } };
-    const ed = el('button', 'glass-btn small edit-only', '✎'); ed.type = 'button'; ed.setAttribute('aria-label', 'Edit');
-    ed.onclick = e => { e.stopPropagation(); openForm({ title: 'গানের তথ্য এডিট', fields: [
-      { name: 'title', label: 'গানের নাম', value: t.title || '', required: true }, { name: 'artist', label: 'শিল্পীর নাম', value: t.artist || '' }],
-      onSubmit: v => { store.meta[t.id] = { ...(store.meta[t.id] || {}), title: v.title.trim(), artist: v.artist.trim() }; save(); const was = curId; renderMusic(); const k = tracks.findIndex(x => x.id === was); if (k >= 0) { cur = k; $$('#playlist .pl-item').forEach((n, q) => n.classList.toggle('active', q === k)); $('#trackTitle').textContent = tracks[k].title; $('#trackArtist').textContent = tracks[k].artist || 'শিল্পী অজানা'; } } }); };
-    li.append(ed, dl);
     li.onclick = () => loadTrack(i, true);
     li.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); loadTrack(i, true); } };
     pl.appendChild(li);
@@ -631,25 +474,7 @@ audio.addEventListener('timeupdate', () => {
 audio.addEventListener('error', () => { if (audio.getAttribute('src')) { setPlayingUI(false); toast('গানের ফাইল পাওয়া যায়নি'); } });
 $('#progress').addEventListener('input', e => { if (audio.duration) audio.currentTime = e.target.value / 1000 * audio.duration; setRange(e.target); });
 $('#volume').addEventListener('input', e => { audio.volume = e.target.value; setRange(e.target); });
-audio.volume = .8; setRange($('#volume')); $('#volume').value = .8; setRange($('#volume')); setRange($('#progress'));
-
-$('#addSong').addEventListener('click', () => openForm({
-  title: 'গান যোগ করুন',
-  fields: [
-    { name: 'file', label: 'MP3 ফাইল', type: 'file', accept: '.mp3,audio/mpeg', required: true },
-    { name: 'title', label: 'গানের নাম', hint: 'খালি রাখলে ফাইলের নাম ব্যবহার হবে।' },
-    { name: 'artist', label: 'শিল্পীর নাম' },
-    { name: 'cover', label: 'কভার ছবি (ঐচ্ছিক)', type: 'file', accept: '.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp' },
-  ],
-  onSubmit: async v => {
-    const f = v.file[0];
-    if (!/\.mp3$/i.test(f.name) && f.type !== 'audio/mpeg') throw new Error('not mp3');
-    const id = uid(); await putBlob(id, f);
-    const rec = { id, blobId: id, title: v.title.trim() || baseName(f.name), artist: v.artist.trim() };
-    if (v.cover[0]) { rec.coverBlobId = uid(); await putBlob(rec.coverBlobId, v.cover[0]); }
-    store.added.music.push(rec); save(); renderMusic(); toast('গান যোগ হয়েছে');
-  }
-}));
+audio.volume = .8; $('#volume').value = .8; setRange($('#volume')); setRange($('#progress'));
 
 /* ==========================================================
    Particles (হালকা, ভাসমান কাচের বুদবুদ)
@@ -682,9 +507,7 @@ $('#addSong').addEventListener('click', () => openForm({
 /* ==========================================================
    Init
    ========================================================== */
-function renderAll() { renderLetter(); renderPoem(); renderStory(); renderPhotos(); renderVideos(); renderMusic(); }
-try { setEdit(localStorage.getItem('fariha_edit') === '1'); } catch {}
-renderAll();
+renderLetter(); renderPoem(); renderStory(); renderPhotos(); renderVideos(); renderMusic();
 route();
 const loaderStart = performance.now();
 const hideLoader = () => setTimeout(() => $('#loader').classList.add('done'), Math.max(0, 1300 - (performance.now() - loaderStart)));
